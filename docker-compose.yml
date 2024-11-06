@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  task_service:
+    build:
+      context: ./task_service
+    container_name: task_service
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+    environment:
+      - FLASK_APP=app.py
+      - MONGO_URI=mongodb://mongo:27017/task_db
+    volumes:
+      - ./task_service:/app
+
+  user_service:
+    build:
+      context: ./user_service
+    container_name: user_service
+    ports:
+      - "5001:5001"
+    depends_on:
+      - mongo
+    environment:
+      - FLASK_APP=app.py
+      - MONGO_URI=mongodb://mongo:27017/user_db
+    volumes:
+      - ./user_service:/app
+
+volumes:
+  mongo_data:
